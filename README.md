@@ -1,6 +1,6 @@
 ## 🚀 Billing System  
 
-A web-based ** Billing System** built using **ReactJS, TailwindCSS, Node.js (ExpressJS), and MongoDB**. The system enables users to generate fuel invoices dynamically and export them as PDFs. The backend leverages **jsPDF and jsPDF-AutoTable** for generating professional invoices.  
+A web-based **Billing System** built using **ReactJS, TailwindCSS, Node.js (ExpressJS), and MongoDB**. The system enables users to generate fuel invoices dynamically and export them as PDFs. The backend leverages **jsPDF and jsPDF-AutoTable** for generating professional invoices.  
 
 ### ⚡ Current Features  
 - Generate **fuel invoices** with station details, vehicle information, and payment details.  
