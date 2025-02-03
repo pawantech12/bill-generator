@@ -3,9 +3,29 @@ require("jspdf-autotable");
 const fs = require("fs");
 const path = require("path");
 
+// const generatePDF = async (data) => {
+
+//   // Convert ArrayBuffer to Buffer
+//   const pdfBytes = doc.output("arraybuffer");
+//   const pdfBuffer = Buffer.from(pdfBytes); // Convert ArrayBuffer to Buffer
+
+//   return pdfBuffer;
+// };
 const generatePDF = async (data) => {
   const doc = new jsPDF();
 
+  // Select template based on data.template (template1 or template2)
+  if (data.template === "template1") {
+    return generateTemplate1(doc, data);
+  } else if (data.template === "template2") {
+    return generateTemplate2(doc, data);
+  }
+
+  // Fallback in case no template is specified (default to template1)
+  return generateTemplate1(doc, data);
+};
+
+const generateTemplate1 = (doc, data) => {
   // Add title "Fuel Receipt" at the top center
   doc.setFontSize(20);
   doc.setTextColor(51, 102, 204); // RGB color for title
@@ -122,10 +142,70 @@ const generatePDF = async (data) => {
   doc.setTextColor(0, 128, 0); // Green color for thank you message
   doc.text("Thank you for your purchase!", 105, 270, { align: "center" });
 
-  // Convert ArrayBuffer to Buffer
-  const pdfBytes = doc.output("arraybuffer");
-  const pdfBuffer = Buffer.from(pdfBytes); // Convert ArrayBuffer to Buffer
+  return createPDFBuffer(doc);
+};
+const generateTemplate2 = (doc, data) => {
+  // Get PDF page width
+  const pageWidth = doc.internal.pageSize.getWidth();
 
+  // Calculate the X position for center alignment
+  const logoWidth = 50; // Width of the logo
+  const centerX = (pageWidth - logoWidth) / 2;
+
+  // Add logo at the top-center
+  const logoPath = path.join(__dirname, `../assets/${data.logo}.png`);
+  const logoBytes = fs.readFileSync(logoPath);
+  const logoBase64 = `data:image/png;base64,${logoBytes.toString("base64")}`;
+
+  doc.addImage(logoBase64, "PNG", centerX, 20, logoWidth, 50); // Centered logo
+
+  let y = 80; // Adjusted vertical position for text
+
+  // Add Receipt No. (Invoice No.)
+  doc.setFontSize(14);
+  doc.setTextColor(0, 0, 0); // Black text
+  doc.text(`Receipt No: ${data.invoiceNumber}`, 20, y); // Left aligned
+  y += 10;
+
+  doc.text(`Product Details:`, 20, y);
+  y += 8;
+  doc.text(`Fuel Rate: ${data.fuelRate} /Ltr`, 20, y);
+  y += 8;
+  doc.text(`Total Amount: ${data.totalAmount}`, 20, y);
+  y += 8;
+  doc.text(`Volume(Ltr): ${data.quantity}`, 20, y);
+  y += 20;
+
+  // Add Customer Details (Veh Type, Veh No, Customer Name)
+  doc.text(`Veh Type: ${data.vehicleType}`, 20, y);
+  y += 8;
+  doc.text(`Veh No: ${data.vehicleNumber}`, 20, y);
+  y += 8;
+  doc.text(`Customer Name: ${data.customerName}`, 20, y);
+  y += 20;
+
+  // Add Date and Time (on the same line)
+  doc.text(`Date: ${data.billDate}`, 20, y);
+  doc.text(`Time: ${data.billTime}`, 180, y); // Right-aligned
+  y += 10;
+
+  // Add Payment Mode (centered)
+  doc.setFontSize(14);
+  doc.text(`Mode: ${data.paymentMethod}`, 20, y, { align: "left" });
+  y += 20;
+
+  // Add "Save fuel, save money" message (centered)
+  doc.setFontSize(16);
+  doc.setTextColor(0, 128, 0); // Green color for the message
+  doc.text("Save fuel, save money", 105, y, { align: "center" });
+
+  return createPDFBuffer(doc);
+};
+
+// Helper function to create PDF Buffer (both templates use this)
+const createPDFBuffer = (doc) => {
+  const pdfBytes = doc.output("arraybuffer");
+  const pdfBuffer = Buffer.from(pdfBytes);
   return pdfBuffer;
 };
 
